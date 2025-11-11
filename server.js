@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import serverless from "serverless-http";
+
 import contentRoutes from "./routes/contentRoutes.routes.js";
 
 dotenv.config();
@@ -12,7 +14,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🔌 MongoDB-yə qoşulma
+// MongoDB-yə qoşulma
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
@@ -21,8 +23,5 @@ mongoose
 // Routes
 app.use("/api/content", contentRoutes);
 
-// Serveri işə sal
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
-
-export default app;
+// Vercel üçün export
+export const handler = serverless(app);
