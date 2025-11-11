@@ -31,21 +31,35 @@ export const createContent = async (req, res) => {
     let coverImageUrl = "";
     let galleryImageUrls = [];
 
+    // Upload cover image from memory buffer
     if (req.files?.coverImage) {
-      const result = await cloudinary.uploader.upload(
-        req.files.coverImage[0].path,
-        {
-          folder: "content/cover",
-        }
-      );
+      const file = req.files.coverImage[0];
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "content/cover", resource_type: "image" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        ).end(file.buffer);
+      });
       coverImageUrl = result.secure_url;
     }
 
+    // Upload gallery images from memory buffers
     if (req.files?.galleryImages) {
       const uploads = await Promise.all(
-        req.files.galleryImages.map((file) =>
-          cloudinary.uploader.upload(file.path, { folder: "content/gallery" })
-        )
+        req.files.galleryImages.map((file) => {
+          return new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream(
+              { folder: "content/gallery", resource_type: "image" },
+              (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+              }
+            ).end(file.buffer);
+          });
+        })
       );
       galleryImageUrls = uploads.map((u) => u.secure_url);
     }
@@ -195,6 +209,39 @@ export const updateContent = async (req, res) => {
           message: "Content with this slug already exists",
         });
       }
+    }
+
+    // Handle cover image upload from memory buffer
+    if (req.files?.coverImage) {
+      const file = req.files.coverImage[0];
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "content/cover", resource_type: "image" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        ).end(file.buffer);
+      });
+      updateData.coverImage = result.secure_url;
+    }
+
+    // Handle gallery images upload from memory buffers
+    if (req.files?.galleryImages && req.files.galleryImages.length > 0) {
+      const uploads = await Promise.all(
+        req.files.galleryImages.map((file) => {
+          return new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream(
+              { folder: "content/gallery", resource_type: "image" },
+              (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+              }
+            ).end(file.buffer);
+          });
+        })
+      );
+      updateData.galleryImages = uploads.map((u) => u.secure_url);
     }
 
     const updatedContent = await Content.findByIdAndUpdate(
