@@ -6,9 +6,17 @@ import {
   updateContent,
 } from "../controller/contentController.js";
 import multer from "multer";
+import path from "path";
 
 const router = express.Router();
-const upload = multer({ dest: "uploads/" });
+
+// Serverless environments (like Vercel) require /tmp directory for file uploads
+// Use /tmp in production/serverless, uploads/ in development
+const uploadDir = process.env.VERCEL || process.env.NODE_ENV === "production" 
+  ? "/tmp" 
+  : path.join(process.cwd(), "uploads");
+
+const upload = multer({ dest: uploadDir });
 
 router.get("/", getContents);
 router.post(
