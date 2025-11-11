@@ -197,26 +197,6 @@ export const updateContent = async (req, res) => {
       }
     }
 
-    // Handle file uploads
-    if (req.files?.coverImage) {
-      const result = await cloudinary.uploader.upload(
-        req.files.coverImage[0].path,
-        {
-          folder: "content/cover",
-        }
-      );
-      updateData.coverImage = result.secure_url;
-    }
-
-    if (req.files?.galleryImages) {
-      const uploads = await Promise.all(
-        req.files.galleryImages.map((file) =>
-          cloudinary.uploader.upload(file.path, { folder: "content/gallery" })
-        )
-      );
-      updateData.galleryImages = uploads.map((u) => u.secure_url);
-    }
-
     const updatedContent = await Content.findByIdAndUpdate(
       id,
       { ...updateData, updatedAt: Date.now() },
