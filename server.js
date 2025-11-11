@@ -5,7 +5,10 @@ import contentRoutes from "./routes/contentRoutes.routes.js";
 import connectDb from "./lib/db.js";
 
 dotenv.config();
-connectDb();
+
+connectDb().catch((err) => {
+  console.error("Database connection error:", err);
+});
 
 const app = express();
 
