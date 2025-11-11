@@ -6,9 +6,7 @@ import connectDb from "./lib/db.js";
 
 dotenv.config();
 
-connectDb().catch((err) => {
-  console.error("Database connection error:", err);
-});
+connectDb();
 
 const app = express();
 
