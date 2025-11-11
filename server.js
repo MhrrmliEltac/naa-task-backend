@@ -21,4 +21,4 @@ app.listen(5000, () => {
 });
 
 // Vercel üçün export
-export const handler = serverless(app);
+export default app;
